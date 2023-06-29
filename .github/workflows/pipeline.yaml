@@ -44,7 +44,7 @@ jobs:
   tfsec:
     name: tfsec
     runs-on: ubuntu-latest
-    if: github.event == 'pull_request'
+    if: ${{ github.event_name == 'pull_request' }}
 
     steps:
       - name: Clone repo
@@ -59,7 +59,7 @@ jobs:
     name: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ inputs.DEPLOY_APPLICATION || 'vpc' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}
-    if: github.event != 'pull_request'
+    if: ${{ github.event_name != 'pull_request' }}
 
     defaults:
       run:

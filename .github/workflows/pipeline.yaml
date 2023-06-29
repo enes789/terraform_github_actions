@@ -3,12 +3,12 @@ name: Terraform Deployment
 run-name: ${{ inputs.DEPLOY_MODE }} ${{ inputs.DEPLOY_APPLICATION }} on ${{ inputs.DEPLOY_ENVIRONMENT }}
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main 
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main 
      
   workflow_dispatch:
     inputs:

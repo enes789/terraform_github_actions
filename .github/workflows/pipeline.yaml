@@ -6,11 +6,26 @@ on:
   push:
     branches:
       - main
+  # workflow_call:
+  #   inputs:
+  #     DEPLOY_ENVIRONMENT:
+  #       description: 'Input environment'
+  #       required: true 
+  #       type: string
+  #     DEPLOY_APPLICATION:
+  #       description: 'Input the Terraform stack'
+  #       required: true 
+  #       type: string
+  #     DEPLOY_MODE:
+  #       description: 'Whether to deploy or destroy the infrastructure'
+  #       required: true 
+  #       type: string    
   workflow_dispatch:
     inputs:
       DEPLOY_ENVIRONMENT:
         description: 'Select the environment.'
         required: true
+        type: choice
         default: 'dev'
         options:
           - 'dev'
@@ -19,6 +34,7 @@ on:
       DEPLOY_APPLICATION:
         description: 'Select the application.'
         required: true
+        type: choice
         default: 'vpc'
         options:
           - 'vpc'
@@ -27,7 +43,8 @@ on:
       DEPLOY_MODE:
         description: 'Select the mode.'
         required: true
-        default: 'apply'
+        type: choice
+        default: 'plan'
         options:
           - 'plan'
           - 'apply'
@@ -55,7 +72,7 @@ jobs:
   terraform:
     name: '${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}'
     runs-on: ubuntu-latest
-    environment: ${{ inputs.input_environment }}
+    environment: ${{ inputs.DEPLOY_ENVIRONMENT }}
 
     defaults:
       run:
@@ -78,7 +95,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          git config --global url."https://oauth2:${{ env.PLATFORM_DEVOPS_GITHUB_DEV_GITHUB_API_TOKEN }}@github.com".insteadOf https://github.com
+          # git config --global url."https://oauth2:${{ env.PLATFORM_DEVOPS_GITHUB_DEV_GITHUB_API_TOKEN }}@github.com".insteadOf https://github.com
           terraform init
 
       - name: Terraform Plan

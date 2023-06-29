@@ -33,10 +33,10 @@ on:
           - 'apply'
           - 'destroy'
 
-env:
-  DEPLOY_ENVIRONMENT: ${{ env.DEPLOY_ENVIRONMENT }}
-  DEPLOY_APPLICATION: ${{ env.DEPLOY_APPLICATION }}
-  DEPLOY_MODE: ${{ env.DEPLOY_MODE }}
+# env:
+#   DEPLOY_ENVIRONMENT: ${{ env.DEPLOY_ENVIRONMENT }}
+#   DEPLOY_APPLICATION: ${{ env.DEPLOY_APPLICATION }}
+#   DEPLOY_MODE: ${{ env.DEPLOY_MODE }}
 
 jobs:
   tfsec:

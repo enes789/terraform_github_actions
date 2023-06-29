@@ -6,23 +6,23 @@ on:
   # push:
   #   branches:
   #     - main
-  pull_request:
-    branches:
-      - main 
-  # workflow_call:
-  #   inputs:
-  #     DEPLOY_ENVIRONMENT:
-  #       description: 'Input environment'
-  #       required: true 
-  #       type: string
-  #     DEPLOY_APPLICATION:
-  #       description: 'Input the Terraform stack'
-  #       required: true 
-  #       type: string
-  #     DEPLOY_MODE:
-  #       description: 'Whether to deploy or destroy the infrastructure'
-  #       required: true 
-  #       type: string          
+  # pull_request:
+  #   branches:
+  #     - main 
+  workflow_call:
+    inputs:
+      DEPLOY_ENVIRONMENT:
+        description: 'Input environment'
+        required: true 
+        type: string
+      DEPLOY_APPLICATION:
+        description: 'Input the Terraform stack'
+        required: true 
+        type: string
+      DEPLOY_MODE:
+        description: 'Whether to deploy or destroy the infrastructure'
+        required: true 
+        type: string          
   workflow_dispatch:
     inputs:
       DEPLOY_ENVIRONMENT:

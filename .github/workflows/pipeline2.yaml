@@ -60,7 +60,7 @@ jobs:
     name: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ github.event.inputs.DEPLOY_APPLICATION || 'vpc' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}
-    if: ${{ github.event_name != 'pull_request' }}
+    # if: ${{ github.event_name != 'pull_request' }}
 
     defaults:
       run:

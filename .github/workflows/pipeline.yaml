@@ -43,7 +43,7 @@ jobs:
   tfsec:
     name: tfsec
     runs-on: ubuntu-latest
-    if: github.event == 'pull_request'
+    # if: github.event == 'pull_request'
 
     steps:
       - name: Clone repo
@@ -93,7 +93,7 @@ jobs:
           fi
 
       - name: Terraform Apply
-        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && inputs.DEPLOY_MODE != 'plan' }}  
+        if: ${{ github.ref == 'refs/heads/main' && inputs.DEPLOY_MODE != 'plan' }}  
         run: |
           if [[ "${{ inputs.DEPLOY_MODE }}" == "destroy" ]]; then
             terraform destroy -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.txt"

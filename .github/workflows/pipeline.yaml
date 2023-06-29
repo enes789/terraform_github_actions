@@ -8,7 +8,8 @@ on:
   #     - main
   pull_request:
     branches:
-      - main       
+      - main 
+     
   workflow_dispatch:
     inputs:
       DEPLOY_ENVIRONMENT:
@@ -43,7 +44,7 @@ jobs:
   tfsec:
     name: tfsec
     runs-on: ubuntu-latest
-    if: github.event == 'pull_request'
+    # if: github.event == 'pull_request'
 
     steps:
       - name: Clone repo
@@ -55,14 +56,14 @@ jobs:
           soft_fail: true
 
   terraform:
-    name: '${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}'
+    name: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ inputs.DEPLOY_APPLICATION || 'vpc' }}
     runs-on: ubuntu-latest
-    environment: ${{ inputs.DEPLOY_ENVIRONMENT }}
+    environment: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}
 
     defaults:
       run:
         shell: bash
-        working-directory: ./${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}
+        working-directory: ./${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ inputs.DEPLOY_APPLICATION || 'vpc' }}
 
     steps:
       - name: Checkout code
@@ -87,17 +88,17 @@ jobs:
         run: |
           terraform validate
           if [[ "${{ inputs.DEPLOY_MODE }}" == "destroy" ]]; then
-            terraform plan -destroy -out "${{ inputs.DEPLOY_ENVIRONMENT }}.txt"
+            terraform plan -destroy -out "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
           else
-            terraform plan -out "${{ inputs.DEPLOY_ENVIRONMENT }}.txt"
+            terraform plan -out "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
           fi
 
       - name: Terraform Apply
-        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && inputs.DEPLOY_MODE != 'plan' }}  
+        if: ${{ github.ref == 'refs/heads/main' && inputs.DEPLOY_MODE != 'plan' }}  
         run: |
           if [[ "${{ inputs.DEPLOY_MODE }}" == "destroy" ]]; then
-            terraform destroy -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.txt"
+            terraform destroy -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
           else
-            terraform apply -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.txt"
+            terraform apply -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
           fi
           

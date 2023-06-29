@@ -1,0 +1,103 @@
+name: Terraform Deployment
+
+run-name: ${{ github.event.inputs.DEPLOY_MODE }} ${{ github.event.inputs.DEPLOY_APPLICATION }} on ${{ github.event.inputs.DEPLOY_ENVIRONMENT }}
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main 
+     
+  workflow_dispatch:
+    inputs:
+      DEPLOY_ENVIRONMENT:
+        description: 'Select the environment.'
+        required: true
+        type: choice
+        default: 'dev'
+        options:
+          - 'dev'
+          - 'qa'
+          - 'prod'
+      DEPLOY_APPLICATION:
+        description: 'Select the application.'
+        required: true
+        type: choice
+        default: 'vpc'
+        options:
+          - 'vpc'
+          - 'spec-search-indexer'
+          - 'bastion'
+      DEPLOY_MODE:
+        description: 'Select the mode.'
+        required: true
+        type: choice
+        default: 'plan'
+        options:
+          - 'plan'
+          - 'apply'
+          - 'destroy'
+
+         
+jobs:
+  tfsec:
+    name: tfsec
+    runs-on: ubuntu-latest
+    # if: ${{ github.event_name == 'pull_request' }}
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          soft_fail: true
+
+  terraform:
+    name: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ github.event.inputs.DEPLOY_APPLICATION || 'vpc' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}
+    if: ${{ github.event_name != 'pull_request' }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ github.event.inputs.DEPLOY_APPLICATION || 'vpc' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: |
+          # git config --global url."https://oauth2:${{ env.PLATFORM_DEVOPS_GITHUB_DEV_GITHUB_API_TOKEN }}@github.com".insteadOf https://github.com
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          terraform validate
+          if [[ "${{ github.event.inputs.DEPLOY_MODE }}" == "destroy" ]]; then
+            terraform plan -destroy -out "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
+          else
+            terraform plan -out "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
+          fi
+
+      - name: Terraform Apply
+        if: ${{ github.ref == 'refs/heads/main' && github.event.inputs.DEPLOY_MODE != 'plan' }}  
+        run: |
+          terraform apply -input=false "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
+
+          

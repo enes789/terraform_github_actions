@@ -1,6 +1,6 @@
 name: Terraform Deployment
 
-run-name: ${{ inputs.DEPLOY_MODE }} ${{ inputs.DEPLOY_APPLICATION }} on ${{ inputs.DEPLOY_ENVIRONMENT }}
+run-name: ${{ github.event.inputs.DEPLOY_MODE }} ${{ github.event.inputs.DEPLOY_APPLICATION }} on ${{ github.event.inputs.DEPLOY_ENVIRONMENT }}
 
 on:
   # push:
@@ -40,6 +40,7 @@ on:
           - 'apply'
           - 'destroy'
 
+         
 jobs:
   tfsec:
     name: tfsec
@@ -56,15 +57,15 @@ jobs:
           soft_fail: true
 
   terraform:
-    name: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ inputs.DEPLOY_APPLICATION || 'vpc' }}
+    name: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ github.event.inputs.DEPLOY_APPLICATION || 'vpc' }}
     runs-on: ubuntu-latest
-    environment: ${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}
+    environment: ${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}
     if: ${{ github.event_name != 'pull_request' }}
 
     defaults:
       run:
         shell: bash
-        working-directory: ./${{ inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ inputs.DEPLOY_APPLICATION || 'vpc' }}
+        working-directory: ./${{ github.event.inputs.DEPLOY_ENVIRONMENT || 'dev' }}/${{ github.event.inputs.DEPLOY_APPLICATION || 'vpc' }}
 
     steps:
       - name: Checkout code
@@ -88,15 +89,15 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform validate
-          if [[ "${{ inputs.DEPLOY_MODE }}" == "destroy" ]]; then
-            terraform plan -destroy -out "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
+          if [[ "${{ github.event.inputs.DEPLOY_MODE }}" == "destroy" ]]; then
+            terraform plan -destroy -out "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
           else
-            terraform plan -out "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
+            terraform plan -out "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
           fi
 
       - name: Terraform Apply
-        if: ${{ github.ref == 'refs/heads/main' && inputs.DEPLOY_MODE != 'plan' }}  
+        if: ${{ github.ref == 'refs/heads/main' && github.event.inputs.DEPLOY_MODE != 'plan' }}  
         run: |
-          terraform apply -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
+          terraform apply -input=false "${{ github.event.inputs.DEPLOY_ENVIRONMENT }}.out"
 
           

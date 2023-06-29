@@ -96,9 +96,6 @@ jobs:
       - name: Terraform Apply
         if: ${{ github.ref == 'refs/heads/main' && inputs.DEPLOY_MODE != 'plan' }}  
         run: |
-          if [[ "${{ inputs.DEPLOY_MODE }}" == "destroy" ]]; then
-            terraform destroy -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
-          else
-            terraform apply -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
-          fi
+          terraform apply -input=false "${{ inputs.DEPLOY_ENVIRONMENT }}.out"
+
           

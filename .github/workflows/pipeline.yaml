@@ -56,14 +56,14 @@ jobs:
           soft_fail: true
 
   terraform:
-    name: '${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}'
+    name: '${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}  || dev/vpc'
     runs-on: ubuntu-latest
-    environment: ${{ inputs.DEPLOY_ENVIRONMENT }}
+    environment: '${{ inputs.DEPLOY_ENVIRONMENT }} || dev'
 
     defaults:
       run:
         shell: bash
-        working-directory: ./${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }}
+        working-directory: './${{ inputs.DEPLOY_ENVIRONMENT }}/${{ inputs.DEPLOY_APPLICATION }} || dev/vpc'
 
     steps:
       - name: Checkout code
